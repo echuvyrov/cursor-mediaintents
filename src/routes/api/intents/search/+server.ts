@@ -69,3 +69,14 @@ export const POST: RequestHandler = async ({ request }) => {
         return new Response('Internal Server Error', { status: 500, headers: corsHeaders });
     }
 };
+
+export const OPTIONS: RequestHandler = async () => {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*', // or specific domain
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, x-api-key'
+      }
+    });
+  };
