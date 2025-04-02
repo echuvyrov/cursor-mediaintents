@@ -17,15 +17,18 @@
         }
     }
     
-    async function handleSubmit(data: Omit<MediaIntent, 'id'>) {
+    async function handleSubmit(data: Omit<MediaIntent, 'id' | 'createdAt' | 'updatedAt' | 'intentEmbedding'>) {
         try {
             if (selectedIntent) {
+                console.log('updating data ', JSON.stringify(data));
                 await fetch(`/api/intents/${selectedIntent.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
             } else {
+                console.log('reading?? data ', JSON.stringify(data));
+
                 await fetch('/api/intents', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -54,6 +57,11 @@
     function handleEdit(intent: MediaIntent) {
         selectedIntent = intent;
         showForm = true;
+    }
+    
+    function handleCancel() {
+        showForm = false;
+        selectedIntent = null;
     }
     
     onMount(loadIntents);
@@ -85,7 +93,11 @@
             <h2 class="text-xl font-semibold mb-4">
                 {selectedIntent ? 'Edit Intent' : 'New Intent'}
             </h2>
-            <IntentForm intent={selectedIntent || {}} onSubmit={handleSubmit} />
+            <IntentForm 
+                intent={selectedIntent || {}} 
+                onSubmit={handleSubmit}
+                onCancel={handleCancel}
+            />
         </div>
     {/if}
     
@@ -94,8 +106,9 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intent</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Media Type</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Media URL</th>
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
@@ -103,16 +116,13 @@
                 {#each intents as intent}
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{intent.intent}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{intent.title}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{intent.mediaType}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{intent.order}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <a href={intent.mediaUrl} target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-900">
-                                {intent.mediaUrl}
-                            </a>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
                             <button
                                 on:click={() => handleEdit(intent)}
-                                class="text-indigo-600 hover:text-indigo-900 mr-4"
+                                class="text-indigo-600 hover:text-indigo-900"
                             >
                                 Edit
                             </button>
