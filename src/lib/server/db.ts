@@ -115,7 +115,7 @@ export const db = {
              FROM media_intents 
              WHERE intent_embedding IS NOT NULL
              AND 1 - (intent_embedding <=> $1::vector) >= $3
-             ORDER BY order, intent_embedding <=> $1::vector
+             ORDER BY "order", intent_embedding <=> $1::vector
              LIMIT $2`,
             [formattedEmbedding, limit, similarityThreshold]
         );
