@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
+import { translateToEnglish } from '$lib/server/translation-service';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*', // Or a specific domain
@@ -10,7 +11,6 @@ const corsHeaders = {
   
 export const GET: RequestHandler = async ({ request, url }) => {
     try {
-
         const query = url.searchParams.get('q');
         const limit = parseInt(url.searchParams.get('limit') || '5');
         const threshold = parseFloat(url.searchParams.get('threshold') || '0.75');
@@ -49,10 +49,14 @@ export const POST: RequestHandler = async ({ request }) => {
             return new Response('Body must include a "query" field', { status: 400, headers: corsHeaders });
         }
 
-        const results = await db.findSimilarIntentsByText(query, limit, threshold);
+        // Translate the query to English if needed
+        const translatedQuery = await translateToEnglish(query);
+        
+        const results = await db.findSimilarIntentsByText(translatedQuery, limit, threshold);
         
         return new Response(JSON.stringify({
             query,
+            translatedQuery: translatedQuery !== query ? translatedQuery : undefined,
             results: results.map(r => ({
                 ...r,
                 similarity: parseFloat(r.similarity.toFixed(4))
